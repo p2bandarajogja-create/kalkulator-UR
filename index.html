@@ -399,6 +399,8 @@ function calc(){
   else if(s.type==='rtier'){denda= st.ke>=5? s.max : s.m[st.ke-1]*s.base; ket= st.ke>=5?`denda maksimum (pelanggaran ke-5 atau lebih)`:`${s.m[st.ke-1]}× ${fmt(s.base)} (pelanggaran ke-${st.ke})`}
   else if(s.type==='flat'){denda=s.v;ket='denda tetap'}
   const usesCukai=!(s.type==='rtier'||s.type==='flat');
+  const dendaAsli=Math.round(denda);
+  denda=Math.ceil(dendaAsli/1000)*1000;          // pembulatan ribuan ke atas
   const pokok = usesCukai && st.pokok ? nilai : 0;
   const total=denda+pokok;
 
@@ -407,11 +409,14 @@ function calc(){
     st.items.forEach((it,i)=>{ if(nilaiOf(it)>0) L.push([`${i+1}. ${preset(it)[0]} — ${fnum(qtyOf(it))} ${unitLabel[preset(it)[2]]}`, fmt(nilaiOf(it))]) });
     L.push(['Total nilai cukai',fmt(nilai)]);
   }
-  L.push([`Denda: ${ket}`,fmt(denda)]);
+  if(dendaAsli!==denda){
+    L.push([`Denda: ${ket}`,fmt(dendaAsli)]);
+    L.push(['Denda dibulatkan ribuan ke atas',fmt(denda)]);
+  } else L.push([`Denda: ${ket}`,fmt(denda)]);
   if(pokok) L.push(['Pokok cukai',fmt(pokok)]);
   $('#lines').innerHTML=L.map(l=>`<div class="line"><span>${l[0]}</span><span>${l[1]}</span></div>`).join('');
   $('#grand').textContent=fmt(total);
-  $('#words').textContent= total? '('+terbilang(total)+')' + (total%1000? ` · dibulatkan ribuan: ${fmt(Math.floor(total/1000)*1000)}`:'') : '';
+  $('#words').textContent= total? '('+terbilang(total)+')' : '';
 
   lastText = ['PERHITUNGAN SANKSI ADMINISTRASI BERUPA DENDA CUKAI',
     'Dasar: '+s.label, '',
